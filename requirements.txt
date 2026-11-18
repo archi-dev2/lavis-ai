@@ -1,13 +1,37 @@
+# Environment that reproduces the results reported in the paper.
+# Training:   Kaggle, Python 3.12.13, PyTorch 2.10.0, NVIDIA Tesla T4.
+# Evaluation: Kaggle, Python 3.13,    PyTorch 2.11.0, NVIDIA Tesla T4.
+# Tested from a clean environment on Python 3.13 with exactly this file.
+#
+# transformers 5.0.0, as reported in the paper. Releases from 5.9.0 onwards
+#   fail to load the Q-Former (lavis/models/blip2_models/Qformer.py) with
+#   "TypeError: unsupported operand type(s) for |: 'list' and 'set'".
+#   The 4.33.2 pinned by upstream LAVIS needs tokenizers<0.14, which has no
+#   wheel for Python 3.12 or 3.13.
+# timm 1.0.26. The visual backbone is built with create_model("pvt_v2_b2")
+#   (lavis/models/blip2_models/blip2.py); the 0.4.12 pinned by upstream LAVIS
+#   has no PVTv2 model ("Unknown model (pvt_v2_b2)").
+# torch / torchvision / torchaudio: the evaluation versions, pinned together.
+#   torchaudio 2.11.1 does not load with torch 2.11.0.
+# opencv-python-headless: cv2 is imported when lavis/models loads (via
+#   lavis/processors/randaugment.py). The 4.5.5.64 pinned upstream was built
+#   for NumPy 1.x and fails to import under NumPy 2.
+# easydict: imported when lavis/models loads (via ULIP_models.py).
+# moviepy<2 and open3d: imported by lavis.processors and
+#   lavis.datasets.builders, which pipeline/train.py and pipeline/inference.py
+#   import directly. moviepy 2 removed moviepy.editor; open3d 0.13.0 pinned
+#   upstream has no wheel for Python 3.12+, while 0.20 covers 3.10 to 3.14.
+# peft 0.8.2 and accelerate 1.13.0: the versions reported in the paper.
+
 contexttimer
 decord
-diffusers<=0.16.0
 einops>=0.4.1
 fairscale==0.4.4
 ftfy
 iopath
 ipython
 omegaconf
-opencv-python-headless==4.5.5.64
+opencv-python-headless>=4.10
 opendatasets
 packaging
 pandas
@@ -20,20 +44,23 @@ scikit-image
 sentencepiece
 spacy
 streamlit
-timm==0.4.12
-torch>=1.10.0
-torchvision
+timm==1.0.26
+torch==2.11.0
+torchvision==0.26.0
 tqdm
-transformers==4.33.2
+transformers==5.0.0
 webdataset
 wheel
-torchaudio
+torchaudio==2.11.0
 soundfile
-moviepy
+moviepy<2
 nltk
-peft
-
-easydict==1.9
-pyyaml_env_tag==0.1
-open3d==0.13.0
+peft==0.8.2
+accelerate==1.13.0
 h5py
+easydict>=1.9
+open3d>=0.20
+
+# Optional extras, not used by the captioning pipeline in this paper:
+#   diffusers       # BlipDiffusion only
+#   pyyaml_env_tag  # not imported anywhere in this repo
